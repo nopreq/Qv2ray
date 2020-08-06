@@ -5,6 +5,7 @@ trigger:
     include:
       - master
       - dev
+      - dev-bisect-zxing-3rd
   tags:
     include:
       - v*
