@@ -61,6 +61,8 @@ class MainWindow
     void on_collapseGroupsBtn_clicked();
 
     void on_reConnectChk_stateChanged(int arg1);
+    void on_timeToAddText_textEdited(const QString &arg1);
+    void on_minSpeedText_textEdited(const QString &arg1);
 
   private:
     // Do not declare as slots, we connect them manually.
@@ -179,4 +181,6 @@ class MainWindow
     int64_t upSpeedTotal = 0;
     int speedCount = 0;
     bool bAutoReconnect = false;
+    int timeToAdd = 5;
+    int minSpeed = 600 * 1024;
 };

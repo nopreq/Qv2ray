@@ -829,9 +829,9 @@ void MainWindow::OnStatsAvailable(const ConnectionGroupPair &id, const QMap<Stat
     {
         upSpeedTotal += upSpeed;
         speedCount++;
-        if (3 == speedCount)
+        if (timeToAdd == speedCount)
         {
-            if (upSpeedTotal / 3 < 300 * 1024)
+            if ((upSpeedTotal / timeToAdd) < (minSpeed * 1024))
             {
                 this->groupId = id.groupId;
                 this->connectionId = id.connectionId;
@@ -840,7 +840,7 @@ void MainWindow::OnStatsAvailable(const ConnectionGroupPair &id, const QMap<Stat
                     ConnectionManager->StopConnection();
                 }
                 ConnectionManager->StartConnection({ connectionId, groupId });
-                LOG(MODULE_UI, "speed low,v2ray has reconnect!")
+                LOG(MODULE_CONNECTION, "speed low,v2ray has reconnect! minSpeed :" + QSTRN(minSpeed) + " timeToAdd:" + QSTRN(timeToAdd))
             }
             speedCount = 0;
             upSpeedTotal = 0;
@@ -1143,4 +1143,14 @@ void MainWindow::on_collapseGroupsBtn_clicked()
 void MainWindow::on_reConnectChk_stateChanged(int arg1)
 {
     bAutoReconnect = arg1 == Qt::Checked;
+}
+
+void MainWindow::on_timeToAddText_textEdited(const QString &arg1)
+{
+    timeToAdd = arg1.toInt();
+}
+
+void MainWindow::on_minSpeedText_textEdited(const QString &arg1)
+{
+    minSpeed = arg1.toInt();
 }
