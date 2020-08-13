@@ -691,12 +691,13 @@ void MainWindow::OnConnected(const ConnectionGroupPair &id)
     on_clearlogButton_clicked();
     speedChartWidget->Clear();
     auto name = GetDisplayName(id.connectionId);
+    auto groupname = GetDisplayName(id.groupId);
     if (!GlobalConfig.uiConfig.quietMode)
     {
         qvApp->showMessage(tr("Connected: ") + name, this->windowIcon());
     }
     qvAppTrayIcon->setToolTip(TRAY_TOOLTIP_PREFIX NEWLINE + tr("Connected: ") + name);
-    connetionStatusLabel->setText(tr("Connected: ") + name);
+    connetionStatusLabel->setText(tr("Connected: ") + groupname + (" :: ") + name);
     //
     GlobalConfig.uiConfig.recentConnections.removeAll(id);
     GlobalConfig.uiConfig.recentConnections.push_front(id);
@@ -823,6 +824,8 @@ void MainWindow::OnStatsAvailable(const ConnectionGroupPair &id, const QMap<Stat
     auto totalDataUp = FormatBytes(data[CurrentStatAPIType].second.first);
     auto totalDataDown = FormatBytes(data[CurrentStatAPIType].second.second);
     //
+    LOG(MODULE_UI, "netspeedLabel->setText.")
+    LOG(MODULE_UI, "netspeedLabel->setText1.")
     netspeedLabel->setText(totalSpeedUp + NEWLINE + totalSpeedDown);
     dataamountLabel->setText(totalDataUp + NEWLINE + totalDataDown);
     //
