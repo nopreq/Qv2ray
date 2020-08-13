@@ -823,9 +823,30 @@ void MainWindow::OnStatsAvailable(const ConnectionGroupPair &id, const QMap<Stat
     auto totalSpeedDown = FormatBytes(downSpeed) + "/s";
     auto totalDataUp = FormatBytes(data[CurrentStatAPIType].second.first);
     auto totalDataDown = FormatBytes(data[CurrentStatAPIType].second.second);
+
     //
-    LOG(MODULE_UI, "netspeedLabel->setText.")
-    LOG(MODULE_UI, "netspeedLabel->setText1.")
+    if (bAutoReconnect)
+    {
+        upSpeedTotal += upSpeed;
+        speedCount++;
+        if (3 == speedCount)
+        {
+            if (upSpeedTotal / 3 < 300 * 1024)
+            {
+                this->groupId = id.groupId;
+                this->connectionId = id.connectionId;
+                if (ConnectionManager->IsConnected({ connectionId, groupId }))
+                {
+                    ConnectionManager->StopConnection();
+                }
+                ConnectionManager->StartConnection({ connectionId, groupId });
+                LOG(MODULE_UI, "speed low,v2ray has reconnect!")
+            }
+            speedCount = 0;
+            upSpeedTotal = 0;
+        }
+    }
+    //
     netspeedLabel->setText(totalSpeedUp + NEWLINE + totalSpeedDown);
     dataamountLabel->setText(totalDataUp + NEWLINE + totalDataDown);
     //
@@ -1117,4 +1138,9 @@ void MainWindow::on_pluginsBtn_clicked()
 void MainWindow::on_collapseGroupsBtn_clicked()
 {
     connectionListWidget->collapseAll();
+}
+
+void MainWindow::on_reConnectChk_stateChanged(int arg1)
+{
+    bAutoReconnect = arg1 == Qt::Checked;
 }

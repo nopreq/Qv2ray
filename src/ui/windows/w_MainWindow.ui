@@ -22,7 +22,7 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,0">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0">
       <property name="spacing">
        <number>5</number>
       </property>
@@ -37,6 +37,13 @@
        <widget class="QPushButton" name="pluginsBtn">
         <property name="text">
          <string>Plugins</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="reConnectChk">
+        <property name="text">
+         <string>AutoReCon</string>
         </property>
        </widget>
       </item>
@@ -233,8 +240,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>412</width>
-          <height>738</height>
+          <width>395</width>
+          <height>728</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1">

@@ -60,6 +60,8 @@ class MainWindow
     void on_pluginsBtn_clicked();
     void on_collapseGroupsBtn_clicked();
 
+    void on_reConnectChk_stateChanged(int arg1);
+
   private:
     // Do not declare as slots, we connect them manually.
     void on_actionExit_triggered();
@@ -171,4 +173,10 @@ class MainWindow
     //
     void MWAddConnectionItem_p(const ConnectionGroupPair &id);
     void MWAddGroupItem_p(const GroupId &groupId);
+    //
+    ConnectionId connectionId = NullConnectionId;
+    GroupId groupId = NullGroupId;
+    int64_t upSpeedTotal = 0;
+    int speedCount = 0;
+    bool bAutoReconnect = false;
 };
