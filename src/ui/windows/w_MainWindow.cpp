@@ -828,11 +828,13 @@ void MainWindow::OnStatsAvailable(const ConnectionGroupPair &id, const QMap<Stat
     if (bAutoReconnect)
     {
         upSpeedTotal += upSpeed;
+        LOG(MODULE_CONNECTION, "upSpeed:" + QSTRN(upSpeed) + "  upSpeedTotal:" + QSTRN(upSpeedTotal))
         speedCount++;
         if (timeToAdd == speedCount)
         {
             if ((upSpeedTotal / timeToAdd) < (minSpeed * 1024))
             {
+                LOG(MODULE_CONNECTION, "upSpeedARG:" + QSTRN(upSpeedTotal/timeToAdd))
                 this->groupId = id.groupId;
                 this->connectionId = id.connectionId;
                 if (ConnectionManager->IsConnected({ connectionId, groupId }))
