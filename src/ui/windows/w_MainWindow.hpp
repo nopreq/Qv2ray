@@ -44,6 +44,7 @@ class MainWindow
     void on_clearlogButton_clicked();
     void on_connectionListWidget_customContextMenuRequested(const QPoint &pos);
     void on_importConfigButton_clicked();
+    void on_importConfigDirectButton_clicked();
     void on_subsButton_clicked();
     //
     void on_connectionListWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
@@ -183,4 +184,6 @@ class MainWindow
     bool bAutoReconnect = false;
     int timeToAdd = 5;
     int minSpeed = 600 * 1024;
+
+    QHash<GroupId, QMultiMap<QString, CONFIGROOT>> connectionsToExistingGroup;
 };

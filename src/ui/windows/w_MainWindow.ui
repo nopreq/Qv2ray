@@ -235,6 +235,13 @@
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="importConfigDirectButton">
+            <property name="text">
+             <string>inDirect</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="importConfigButton">
             <property name="toolTip">
              <string>Import Connection</string>

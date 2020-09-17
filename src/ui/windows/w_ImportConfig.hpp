@@ -15,6 +15,7 @@ class ImportConfigWindow
     explicit ImportConfigWindow(QWidget *parent = nullptr);
     ~ImportConfigWindow();
     int PerformImportConnection();
+    int PerformImportConnectionDirect();
     QMultiMap<QString, CONFIGROOT> SelectConnection(bool outboundsOnly);
     void processCommands(QString command, QStringList commands, QMap<QString, QString> args) override
     {
@@ -34,12 +35,16 @@ class ImportConfigWindow
         }
     }
 
+  public:
+    void beginImportDirectBtn();
+
   private:
     QvMessageBusSlotDecl;
   private slots:
     void on_selectFileBtn_clicked();
     void on_qrFromScreenBtn_clicked();
     void on_beginImportBtn_clicked();
+    // void on_beginImportDirectBtn_clicked();
     void on_selectImageBtn_clicked();
     void on_errorsList_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
     void on_connectionEditBtn_clicked();

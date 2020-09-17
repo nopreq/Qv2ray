@@ -32,6 +32,7 @@ ImportConfigWindow::ImportConfigWindow(QWidget *parent) : QvDialog(parent)
             defaultItemIndex = groupCombo->count() - 1;
     }
     groupCombo->setCurrentIndex(defaultItemIndex);
+
 }
 
 void ImportConfigWindow::updateColorScheme()
@@ -113,6 +114,47 @@ int ImportConfigWindow::PerformImportConnection()
     return count;
 }
 
+int ImportConfigWindow::PerformImportConnectionDirect()
+{
+    beginImportDirectBtn();
+    //this->exec();
+    int count = 0;
+    for (const auto &groupObject : connectionsToNewGroup)
+    {
+        const auto groupName = connectionsToNewGroup.key(groupObject);
+        GroupId groupId = ConnectionManager->CreateGroup(groupName, false);
+        for (const auto &connConf : groupObject)
+        {
+            auto connName = groupObject.key(connConf);
+
+            auto [protocol, host, port] = GetConnectionInfo(connConf);
+            if (connName.isEmpty())
+            {
+                connName = protocol + "/" + host + ":" + QSTRN(port) + "-" + GenerateRandomString(5);
+            }
+            ConnectionManager->CreateConnection(connConf, connName, groupId, true);
+        }
+    }
+
+    for (const auto &groupObject : connectionsToExistingGroup)
+    {
+        const auto groupId = connectionsToExistingGroup.key(groupObject);
+        for (const auto &connConf : groupObject)
+        {
+            auto connName = groupObject.key(connConf);
+            auto [protocol, host, port] = GetConnectionInfo(connConf);
+            if (connName.isEmpty())
+            {
+                connName = protocol + "/" + host + ":" + QSTRN(port) + "-" + GenerateRandomString(5);
+            }
+            ConnectionManager->CreateConnection(connConf, connName, groupId, true);
+        }
+    }
+
+
+    return count;
+}
+
 void ImportConfigWindow::on_selectFileBtn_clicked()
 {
     QString dir = QFileDialog::getOpenFileName(this, tr("Select file to import"));
@@ -155,12 +197,13 @@ void ImportConfigWindow::on_qrFromScreenBtn_clicked()
 void ImportConfigWindow::on_beginImportBtn_clicked()
 {
     QString aliasPrefix = nameTxt->text();
-
+    LOG(MODULE_IMPORT, aliasPrefix);
     switch (tabWidget->currentIndex())
     {
         case LINK_PAGE:
         {
             QStringList linkList = SplitLines(vmessConnectionStringTxt->toPlainText());
+            LOG(MODULE_IMPORT, "vmessConnectionStringTxt->toPlainText():" + vmessConnectionStringTxt->toPlainText());
             //
             // Clear UI and error lists
             linkErrors.clear();
@@ -198,6 +241,8 @@ void ImportConfigWindow::on_beginImportBtn_clicked()
                     for (const auto &conf : config)
                     {
                         connectionsToExistingGroup[GroupId{ groupCombo->currentData().toString() }].insert(conf.first, conf.second);
+                        // LOG(MODULE_IMPORT, QSTRN(linkList.count()) + " string(s) found in vmess box.")
+                        LOG(MODULE_IMPORT, groupCombo->currentData().toString() + " group id string(s) found ")
                     }
                 }
                 else
@@ -263,7 +308,96 @@ void ImportConfigWindow::on_beginImportBtn_clicked()
     }
 
     accept();
+    LOG(MODULE_IMPORT, "void ImportConfigWindow::on_beginImportBtn_clicked() accept() fun exec and quit");
 }
+
+void ImportConfigWindow::beginImportDirectBtn()
+{
+    QString aliasPrefix = nameTxt->text();
+    LOG(MODULE_IMPORT, aliasPrefix);
+    // switch (tabWidget->currentIndex())
+    switch (LINK_PAGE)
+    {
+        case LINK_PAGE:
+        {
+            QClipboard *board = QApplication::clipboard();
+            QString str = board->text();
+            vmessConnectionStringTxt->appendPlainText(str);
+            QStringList linkList = SplitLines(vmessConnectionStringTxt->toPlainText());
+            // QStringList linkList = SplitLines(str);
+
+            LOG(MODULE_IMPORT, "vmessConnectionStringTxt->toPlainText():" + vmessConnectionStringTxt->toPlainText());
+            //
+            // Clear UI and error lists
+            linkErrors.clear();
+            vmessConnectionStringTxt->clear();
+            errorsList->clear();
+            //
+            LOG(MODULE_IMPORT, QSTRN(linkList.count()) + " string(s) found in vmess box.")
+
+            while (!linkList.isEmpty())
+            {
+                aliasPrefix = nameTxt->text();
+                const auto link = linkList.takeFirst().trimmed();
+                if (link.isEmpty() || link.startsWith("#") || link.startsWith("//"))
+                    continue;
+
+                // warn if someone tries to import a https:// link
+                if (link.startsWith("https://"))
+                {
+                    errorsList->addItem(tr("WARNING: You may have mistaken 'subscription link' with 'share link'"));
+                }
+
+                QString errMessage;
+                QString newGroupName;
+                const auto config = ConvertConfigFromString(link, &aliasPrefix, &errMessage, &newGroupName);
+
+                // If the config is empty or we have any err messages.
+                if (config.isEmpty() || !errMessage.isEmpty())
+                {
+                    // To prevent duplicated values.
+                    linkErrors[link] = QSTRN(linkErrors.count() + 1) + ": " + errMessage;
+                    continue;
+                }
+                else if (newGroupName.isEmpty())
+                {
+                    for (const auto &conf : config)
+                    {
+                        connectionsToExistingGroup[GroupId{ groupCombo->currentData().toString() }].insert(conf.first, conf.second);
+                        // LOG(MODULE_IMPORT, QSTRN(linkList.count()) + " string(s) found in vmess box.")
+                        LOG(MODULE_IMPORT, groupCombo->currentData().toString() + " group id string(s) found ")
+                    }
+                }
+                else
+                {
+                    for (const auto &conf : config)
+                    {
+                        connectionsToNewGroup[newGroupName].insert(conf.first, conf.second);
+                    }
+                }
+            }
+
+            if (!linkErrors.isEmpty())
+            {
+                for (const auto &item : linkErrors)
+                {
+                    vmessConnectionStringTxt->appendPlainText(linkErrors.key(item));
+                    errorsList->addItem(item);
+                }
+
+                vmessConnectionStringTxt->setLineWidth(errorsList->lineWidth());
+                errorsList->sortItems();
+                return;
+            }
+
+            break;
+        }
+    }
+
+    accept();
+    LOG(MODULE_IMPORT, "void ImportConfigWindow::on_beginImportBtn_clicked() accept() fun exec and quit");
+}
+
 void ImportConfigWindow::on_selectImageBtn_clicked()
 {
     const auto dir = QFileDialog::getOpenFileName(this, tr("Select an image to import"));

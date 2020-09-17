@@ -1,6 +1,7 @@
 #include "w_MainWindow.hpp"
 
 #include "components/update/UpdateChecker.hpp"
+#include "core/connection/Serialization.hpp"
 #include "core/handler/ConfigHandler.hpp"
 #include "core/settings/SettingsBackend.hpp"
 #include "src/Qv2rayApplication.hpp"
@@ -13,6 +14,8 @@
 #include "ui/windows/w_ImportConfig.hpp"
 #include "ui/windows/w_PluginManager.hpp"
 #include "ui/windows/w_PreferencesWindow.hpp"
+
+#include <qcoreevent.h>
 
 #ifdef Q_OS_MAC
     #include <ApplicationServices/ApplicationServices.h>
@@ -617,6 +620,13 @@ void MainWindow::on_importConfigButton_clicked()
     w.PerformImportConnection();
 }
 
+void MainWindow::on_importConfigDirectButton_clicked()
+{
+    ImportConfigWindow w(this);
+    w.PerformImportConnectionDirect();
+    return;
+}
+
 void MainWindow::on_action_RCM_EditAsComplex_triggered()
 {
     CheckCurrentWidget;
@@ -834,7 +844,7 @@ void MainWindow::OnStatsAvailable(const ConnectionGroupPair &id, const QMap<Stat
         {
             if ((upSpeedTotal / timeToAdd) < (minSpeed * 1024))
             {
-                LOG(MODULE_CONNECTION, "upSpeedARG:" + QSTRN(upSpeedTotal/timeToAdd))
+                LOG(MODULE_CONNECTION, "upSpeedARG:" + QSTRN(upSpeedTotal / timeToAdd))
                 this->groupId = id.groupId;
                 this->connectionId = id.connectionId;
                 if (ConnectionManager->IsConnected({ connectionId, groupId }))
